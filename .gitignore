@@ -1,0 +1,38 @@
+# Build
+bin/
+obj/
+
+# User-specific
+*.user
+*.suo
+*.userprefs
+
+# IDE
+.vscode/
+.idea/
+*.sln.docstates
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dotnet
+*.lock.json
+project.lock.json
+
+# EF
+Migrations/obj/
+
+# Secrets
+app.db
+*.db
+*.sqlite
+
+# Docker
+**/docker-data/**
+
+# Generated
+OneProject.Server.GeneratedMSBuildEditorConfig.editorconfig

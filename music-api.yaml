@@ -1,0 +1,228 @@
+openapi: 3.0.3
+info:
+  title: Music API
+  version: "1.0.0"
+  description: >
+    OpenAPI definition (API-first) למודלים של מאגר מוזיקה.
+    מקור אמת לייצור C# models, DB schema ו-TypeScript client.
+servers:
+  - url: http://localhost:5000
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # --- Users / Auth ---
+    UserPublic:
+      type: object
+      description: "User שניתן להחזיר ללקוח (לא מכיל סיסמא/סולט)."
+      required:
+        - id
+        - userName
+        - email
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+          description: "Primary key"
+        userName:
+          type: string
+          example: "alice"
+        email:
+          type: string
+          format: email
+          example: "alice@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-09-07T12:00:00Z"
+
+    UserCreate:
+      type: object
+      description: "Payload לרישום — הסיסמה רק לכתיבה."
+      required:
+        - userName
+        - email
+        - password
+      properties:
+        userName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          writeOnly: true
+          description: "Plain password — יש לאחסן hash+salt בשרת"
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: "משך חיים של ה־access token בשניות"
+
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+        deviceId:
+          type: string
+          description: "מזהה מכשיר/session (אופציונלי)"
+
+    # --- Songs ---
+    Song:
+      type: object
+      description: "ייצוג שיר שמוחזר ללקוח."
+      required:
+        - id
+        - title
+        - artist
+        - durationSeconds
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        artist:
+          type: string
+        album:
+          type: string
+          nullable: true
+        durationSeconds:
+          type: integer
+          description: "אורך השיר בשניות"
+        streamUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: "כתובת לזרם/קובץ"
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateSong:
+      type: object
+      required:
+        - title
+        - artist
+        - durationSeconds
+      properties:
+        title:
+          type: string
+        artist:
+          type: string
+        album:
+          type: string
+          nullable: true
+        durationSeconds:
+          type: integer
+        streamUrl:
+          type: string
+          format: uri
+          nullable: true
+
+    # --- Playlists ---
+    PlaylistItem:
+      type: object
+      description: "פריט ברשימת השמעה (שומר פריטים מסודרים לפי order)."
+      required:
+        - songId
+        - order
+      properties:
+        songId:
+          type: integer
+        title:
+          type: string
+          nullable: true
+        artist:
+          type: string
+          nullable: true
+        order:
+          type: integer
+          description: "מיקום ברשימה (0-based או 1-based — תבחר כללים)"
+
+    Playlist:
+      type: object
+      description: "רשימת השמעה עם פריטים מסודרים."
+      required:
+        - id
+        - name
+        - userId
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        userId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaylistItem'
+          description: "הסדר נשמר בעזרת טבלת קישור (PlaylistSong) ב־DB"
+
+    CreatePlaylist:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+
+    AddSongToPlaylist:
+      type: object
+      required:
+        - songId
+        - order
+      properties:
+        songId:
+          type: integer
+        order:
+          type: integer
+
+    # --- Refresh token entity (internal) ---
+    RefreshTokenEntity:
+      type: object
+      description: "ייצוג טוקן רפרש (לשימוש פנימי/DB)."
+      required:
+        - token
+        - createdAt
+        - expiresAt
+      properties:
+        token:
+          type: string
+        deviceId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        revokedAt:
+          type: string
+          format: date-time
+          nullable: true
+        isActive:
+          type: boolean

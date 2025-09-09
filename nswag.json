@@ -1,0 +1,19 @@
+{
+  "runtime": "Net90",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "music-api.yaml",
+      "newLineBehavior": "Auto"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "MusicApiClient",
+      "namespace": "OneProject.Server.Generated",
+      "generateClientClasses": false,
+      "generateDtoTypes": true,
+      "output": "Generated/Models.cs"
+    }
+  }
+}
