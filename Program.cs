@@ -12,8 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ---- Service ----
-// builder.Services.AddScoped<IGeneratedControllerController, GeneratedControllerService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -131,18 +129,26 @@ if (app.Environment.IsDevelopment())
             await context.SaveChangesAsync();
         }
 
-        // Create 5 users if they don't exist, each with 1-2 playlists and 3-10 songs
-        for (int i = 1; i <= 5; i++)
+        // Create users, each with 1-2 playlists and 3-10 songs
+        var userList = new[]
         {
-            var uname = $"user{i}";
-            var u = context.Users.FirstOrDefault(x => x.UserName == uname);
+            new { UserName = "Daniel Cohen", Email = "daniel.cohen@example.com", Password = "D@nC0hen!92w" },
+            new { UserName = "Maya Levy", Email = "maya.levy@example.com", Password = "MayaL#2025x!" },
+            new { UserName = "Noam Mizrahi", Email = "noam.mizrahi@example.com", Password = "Nm!zR4h1_7Q" },
+            new { UserName = "Yael Adler", Email = "yael.adler@example.com", Password = "Y@elAdl3r%88" },
+            new { UserName = "Omer Katz", Email = "omer.katz@example.com", Password = "0m3rKatz!5v" }
+        };
+
+        foreach (var userInfo in userList)
+        {
+            var u = context.Users.FirstOrDefault(x => x.UserName == userInfo.UserName);
             if (u == null)
             {
                 u = await auth.RegisterAsync(new OneProject.Server.Generated.UserCreate
                 {
-                    UserName = uname,
-                    Email = $"{uname}@example.com",
-                    Password = "Pass123!"
+                    UserName = userInfo.UserName,
+                    Email = userInfo.Email,
+                    Password = userInfo.Password
                 }, role: "User");
             }
 
@@ -150,12 +156,11 @@ if (app.Environment.IsDevelopment())
             var songIds = context.Songs.Select(s => s.Id).ToList();
             if (!songIds.Any()) continue;
 
-            var rnd = new Random(i * 137);
+            var rnd = new Random(userInfo.UserName.GetHashCode());
             int playlistsToCreate = 1 + rnd.Next(0, 2); // 1-2
             for (int p = 1; p <= playlistsToCreate; p++)
             {
-                // Ensure a playlist exists
-                var pname = $"{uname}-playlist-{p}";
+                var pname = $"{userInfo.UserName}-playlist-{p}";
                 var playlist = context.Playlists.FirstOrDefault(pl => pl.Name == pname && pl.UserId == u.Id);
                 if (playlist == null)
                 {
@@ -190,7 +195,6 @@ if (app.Environment.IsDevelopment())
     }
     catch (Exception)
     {
-        // swallow seeding errors in dev
     }
 }
 app.UseAuthentication();
