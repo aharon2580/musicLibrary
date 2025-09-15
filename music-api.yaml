@@ -226,3 +226,35 @@ components:
           nullable: true
         isActive:
           type: boolean
+
+paths:
+  /songs:
+    get:
+      summary: Get all songs
+      operationId: getSongs
+      tags:
+        - Songs
+      responses:
+        '200':
+          description: List of songs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Song'
+  /playlists:
+    get:
+      summary: Get all playlists
+      operationId: getPlaylists
+      tags:
+        - Playlists
+      responses:
+        '200':
+          description: List of playlists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Playlist'

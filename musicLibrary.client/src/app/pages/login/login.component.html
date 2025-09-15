@@ -1,0 +1,28 @@
+<!-- <h2>Login</h2>
+<form (ngSubmit)="login()" #loginForm="ngForm">
+  <label>
+    Username:
+    <input name="userName" [(ngModel)]="loginData.userName" required>
+  </label>
+  <br>
+  <label>
+    Password:
+    <input name="password" type="password" [(ngModel)]="loginData.password" required>
+  </label>
+  <br>
+  <button type="submit">Login</button>
+</form>
+<p *ngIf="loginError">{{loginError}}</p> -->
+<form #loginForm="ngForm" (ngSubmit)="login()">
+  <div>
+    <label>Email:</label>
+    <input name="email" [(ngModel)]="loginData.email" required />
+  </div>
+  <div>
+    <label>Password:</label>
+    <input type="password" name="password" [(ngModel)]="loginData.password" required />
+  </div>
+  <button type="submit">Login</button>
+</form>
+
+<p *ngIf="loginError" style="color:red">{{ loginError }}</p>
