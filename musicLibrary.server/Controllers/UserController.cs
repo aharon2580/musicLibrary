@@ -25,7 +25,7 @@ namespace OneProject.Server.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserCreate user)
+        public async Task<IActionResult> Login([FromBody] UserLogin user)
         {
             var token = await _auth.LoginAsync(user);
             if (token == null) return Unauthorized();
