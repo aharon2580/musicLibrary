@@ -1,1 +1,83 @@
-<p>home works!</p>
+<mat-toolbar color="primary">
+  <span>Music Library</span>
+</mat-toolbar>
+
+<div class="container">
+  <!-- Songs Table -->
+  <mat-card class="table-card">
+    <mat-card-title>Songs</mat-card-title>
+    <mat-card-content>
+      <table mat-table [dataSource]="songs" class="mat-elevation-z8">
+
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let song">{{ song.id }}</td>
+        </ng-container>
+
+        <!-- Title Column -->
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Title</th>
+          <td mat-cell *matCellDef="let song">{{ song.title }}</td>
+        </ng-container>
+
+        <!-- Artist Column -->
+        <ng-container matColumnDef="artist">
+          <th mat-header-cell *matHeaderCellDef>Artist</th>
+          <td mat-cell *matCellDef="let song">{{ song.artist }}</td>
+        </ng-container>
+
+        <!-- Album Column -->
+        <ng-container matColumnDef="album">
+          <th mat-header-cell *matHeaderCellDef>Album</th>
+          <td mat-cell *matCellDef="let song">{{ song.album }}</td>
+        </ng-container>
+
+        <!-- Duration Column -->
+        <ng-container matColumnDef="durationSeconds">
+          <th mat-header-cell *matHeaderCellDef>Duration</th>
+          <td mat-cell *matCellDef="let song">{{ song.durationSeconds }}s</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedSongColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedSongColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Playlists Table -->
+  <mat-card class="table-card">
+    <mat-card-title>Playlists</mat-card-title>
+    <mat-card-content>
+      <table mat-table [dataSource]="playlists" class="mat-elevation-z8">
+
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let playlist">{{ playlist.id }}</td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let playlist">{{ playlist.name }}</td>
+        </ng-container>
+
+        <!-- User ID Column -->
+        <ng-container matColumnDef="userId">
+          <th mat-header-cell *matHeaderCellDef>User ID</th>
+          <td mat-cell *matCellDef="let playlist">{{ playlist.userId }}</td>
+        </ng-container>
+
+        <!-- Created At Column -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created At</th>
+          <td mat-cell *matCellDef="let playlist">{{ playlist.createdAt | date:'short' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedPlaylistColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedPlaylistColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

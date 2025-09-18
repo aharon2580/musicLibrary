@@ -44,9 +44,9 @@ namespace OneProject.Server.Services
             return user;
         }
 
-        public async Task<TokenResponse?> LoginAsync(UserCreate payload)
+        public async Task<TokenResponse?> LoginAsync(UserLogin payload)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == payload.UserName);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == payload.Email);
             if (user == null) return null;
             // Support legacy users with iterations == 0 (HMACSHA256), and upgrade on successful login
             if (user.PasswordIterations <= 0)

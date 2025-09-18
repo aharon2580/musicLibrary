@@ -1,54 +1,51 @@
-// import { Component } from '@angular/core';
-// import { AuthService } from '../../services/auths.service';
-
-// @Component({
-//   selector: 'app-login',
-//   templateUrl: './login.component.html',
-//   styleUrls: ['./login.component.scss']
-// })
-// export class LoginComponent {
-//   constructor(private authService: AuthService) {}
-
-//   login() {
-//     this.authService.login({ email: 'test@test.com', password: '1234' })
-//       .subscribe({
-//         next: res => console.log('Login success', res),
-//         error: err => console.error('Login failed', err)
-//       });
-//   }
-// }
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, CommonModule], // נדרש בשביל ngModel ו-*ngIf
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
+  // מודל לטופס
   loginData = {
     email: '',
-    password: ''
+    password: '',
   };
 
+  // הודעת שגיאה אם נכשל login
   loginError: string | null = null;
 
-  constructor() {}
+  // אינדיקציה לטעינה (למשל spinner)
+  loading = false;
+
+  constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
 
   login() {
-    // Temporary debug log
-    console.log('Login data:', this.loginData);
-
-    // Example validation
-    if (!this.loginData.email || !this.loginData.password) {
-      this.loginError = 'Please enter email and password';
-      return;
-    }
-
+    this.loading = true;
     this.loginError = null;
-    // Call your AuthService here for actual login
+    console.log('Attempting login with', this.loginData);
+    this.http
+      .post<{ accessToken: string }>('http://localhost:5169/api/User/login', this.loginData)
+      .subscribe({
+        next: (res) => {
+          this.authService.setToken(res.accessToken);
+          console.log('Login successful with :', res);
+          this.router.navigate(['/home']);
+        },
+        error: (err) => {
+          console.error('Login failed:', err);
+          this.loginError = 'Invalid username or password';
+        },
+        complete: () => {
+          this.loading = false;
+        },
+      });
   }
 }
