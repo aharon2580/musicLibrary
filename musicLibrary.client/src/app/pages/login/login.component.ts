@@ -30,13 +30,14 @@ export class LoginComponent {
   login() {
     this.loading = true;
     this.loginError = null;
-    console.log('Attempting login with', this.loginData);
     this.http
-      .post<{ accessToken: string }>('http://localhost:5169/api/User/login', this.loginData)
+      .post<{ accessToken: string; refreshToken: string }>(
+        'http://localhost:5169/api/User/login',
+        this.loginData
+      )
       .subscribe({
         next: (res) => {
-          this.authService.setToken(res.accessToken);
-          console.log('Login successful with :', res);
+          this.authService.setTokens(res.accessToken, res.refreshToken);
           this.router.navigate(['/home']);
         },
         error: (err) => {

@@ -1,27 +1,7 @@
-<!-- <h2>Register</h2>
-<form (ngSubmit)="onRegister()" #registerForm="ngForm">
-  <label>
-    Username:
-    <input name="userName" [(ngModel)]="registerData.userName" required>
-  </label>
-  <br>
-  <label>
-    Email:
-    <input name="email" [(ngModel)]="registerData.email" required>
-  </label>
-  <br>
-  <label>
-    Password:
-    <input name="password" type="password" [(ngModel)]="registerData.password" required>
-  </label>
-  <br>
-  <button type="submit">Register</button>
-</form>
-<p *ngIf="registerError">{{registerError}}</p> -->
 <form #registerForm="ngForm" (ngSubmit)="register()">
   <div>
     <label>Name:</label>
-    <input name="name" [(ngModel)]="registerData.name" required />
+    <input name="name" [(ngModel)]="registerData.userName" required />
   </div>
 
   <div>

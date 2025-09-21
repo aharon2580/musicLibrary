@@ -1,30 +1,58 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  private tokenKey = 'accessToken';
+  private accessTokenKey = 'access_token';
+  private refreshTokenKey = 'refresh_token';
+  private apiUrl = 'http://localhost:5169/api/User';
 
-  // שמירת הטוקן אחרי login
-  setToken(accessToken: string): void {
-    localStorage.setItem(this.tokenKey, accessToken);
-    console.log('Token set:', accessToken);
+  constructor(private http: HttpClient) {}
+
+  // שמירת הטוקן
+  setTokens(accessToken: string, refreshToken: string) {
+    localStorage.setItem(this.accessTokenKey, accessToken);
+    localStorage.setItem(this.refreshTokenKey, refreshToken);
   }
 
   // שליפת הטוקן
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.accessTokenKey);
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
   }
 
   // מחיקת הטוקן (ב־logout)
-  clearToken(): void {
-    localStorage.removeItem(this.tokenKey);
+  clearTokens() {
+    localStorage.removeItem(this.accessTokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
   }
 
-  // בדיקה אם המשתמש מחובר
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    return !!token; // אפשר לשדרג לבדיקה אם הטוקן פג תוקף
+  isLoggedIn(): boolean {
+    return !!this.getAccessToken();
+  }
+  async refreshTokens(): Promise<boolean> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) return false;
+
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ accessToken: string; refreshToken: string }>(`${this.apiUrl}/refresh`, {
+          refreshToken,
+        })
+      );
+
+      this.setTokens(res.accessToken, res.refreshToken);
+      return true;
+    } catch (err) {
+      console.error('Token refresh failed', err);
+      this.clearTokens();
+      return false;
+    }
   }
 }

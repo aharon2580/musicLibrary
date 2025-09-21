@@ -3,26 +3,49 @@ import {
   HttpInterceptorFn,
   HttpRequest,
   HttpHandlerFn,
-  HttpEvent
+  HttpEvent,
+  HttpErrorResponse
 } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
-import { Observable } from 'rxjs';
+import { Observable, from, throwError } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<any>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<any>> => {
   const authService = inject(AuthService);
-  const token = authService.getToken();
+  const token = authService.getAccessToken();
 
+  let authReq = req;
   if (token) {
-    const cloned = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
+    authReq = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` },
     });
-    return next(cloned);
   }
 
-  return next(req);
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        // try refresh
+        return from(authService.refreshTokens()).pipe(
+          switchMap((success) => {
+            if (success) {
+              // retry original request with new token
+              const newToken = authService.getAccessToken();
+              const retryReq = req.clone({
+                setHeaders: { Authorization: `Bearer ${newToken}` },
+              });
+              return next(retryReq);
+            } else {
+              // refresh failed → logout or redirect
+              authService.clearTokens();
+              return throwError(() => error);
+            }
+          })
+        );
+      }
+      return throwError(() => error);
+    })
+  );
 };
