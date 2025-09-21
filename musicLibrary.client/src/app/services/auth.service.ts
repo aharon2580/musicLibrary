@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +36,20 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getAccessToken();
+  }
+  getUserName(): string | null {
+    const token = this.getAccessToken();
+
+    if (!token) return null;
+
+    try {
+      // decode the payload
+      const decoded: any = jwtDecode(token);
+      // ClaimTypes.Name becomes "unique_name" in JWT by default
+    return decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || null;
+    } catch {
+      return null;
+    }
   }
   async refreshTokens(): Promise<boolean> {
     const refreshToken = this.getRefreshToken();
