@@ -21,8 +21,18 @@ namespace OneProject.Server.Controllers
         public async Task<IActionResult> Register([FromBody] UserCreate user)
         {
             var created = await _auth.RegisterAsync(user);
-            return Ok(new UserPublic { Id = created.Id, UserName = created.UserName, Email = created.Email, CreatedAt = created.CreatedAt });
+            if (created == null) return BadRequest("Registration failed");
+
+            // auto-login after register
+            var token = await _auth.LoginAsync(new UserLogin
+            {
+                Email = user.Email,
+                Password = user.Password
+            });
+
+            return Ok(token);
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLogin user)
