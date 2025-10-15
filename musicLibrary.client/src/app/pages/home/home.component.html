@@ -1,49 +1,35 @@
-<mat-toolbar color="primary">
-  <span>Music Library</span>
+<mat-toolbar class="top-toolbar">
+  <span class="app-title">Music Library</span>
+
   <span class="spacer"></span>
-  <span *ngIf="userName">Welcome, {{ userName }}</span>
-  <button mat-button (click)="logout()">Logout</button>
+
+  <span class="user-greeting" *ngIf="userName">Welcome, {{ userName }}</span>
+
+  <button class="logout-button" (click)="logout()">Logout</button>
 </mat-toolbar>
 
 <div class="container">
-  <!-- Songs Table -->
+  <!-- Songs Grid -->
   <mat-card class="table-card">
     <mat-card-title>Songs</mat-card-title>
     <mat-card-content>
-      <table mat-table [dataSource]="songs" class="mat-elevation-z8">
-        <!-- ID Column -->
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let song">{{ song.id }}</td>
-        </ng-container>
+      <div class="songs-grid">
+        <mat-card class="song-card" *ngFor="let song of songs">
+          <mat-card-title>{{ song.title }}</mat-card-title>
+          <mat-card-subtitle>{{ song.artist }}</mat-card-subtitle>
+          <p><strong>Album:</strong> {{ song.album }}</p>
+          <p><strong>Duration:</strong> {{ song.durationSeconds }}s</p>
 
-        <!-- Title Column -->
-        <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Title</th>
-          <td mat-cell *matCellDef="let song">{{ song.title }}</td>
-        </ng-container>
-
-        <!-- Artist Column -->
-        <ng-container matColumnDef="artist">
-          <th mat-header-cell *matHeaderCellDef>Artist</th>
-          <td mat-cell *matCellDef="let song">{{ song.artist }}</td>
-        </ng-container>
-
-        <!-- Album Column -->
-        <ng-container matColumnDef="album">
-          <th mat-header-cell *matHeaderCellDef>Album</th>
-          <td mat-cell *matCellDef="let song">{{ song.album }}</td>
-        </ng-container>
-
-        <!-- Duration Column -->
-        <ng-container matColumnDef="durationSeconds">
-          <th mat-header-cell *matHeaderCellDef>Duration</th>
-          <td mat-cell *matCellDef="let song">{{ song.durationSeconds }}s</td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedSongColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedSongColumns"></tr>
-      </table>
+          <div class="song-actions">
+            <button mat-raised-button color="primary" (click)="openPlayPopup(song)">
+              ▶ Play
+            </button>
+            <button mat-stroked-button color="accent" (click)="openAddToPlaylistPopup(song)">
+              ➕ Add to Playlist
+            </button>
+          </div>
+        </mat-card>
+      </div>
     </mat-card-content>
   </mat-card>
 
@@ -52,25 +38,11 @@
     <mat-card-title>Playlists</mat-card-title>
     <mat-card-content>
       <table mat-table [dataSource]="playlists" class="mat-elevation-z8">
-        <!-- ID Column -->
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let playlist">{{ playlist.id }}</td>
-        </ng-container>
-
-        <!-- Name Column -->
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let playlist">{{ playlist.name }}</td>
         </ng-container>
 
-        <!-- User ID Column -->
-        <ng-container matColumnDef="userId">
-          <th mat-header-cell *matHeaderCellDef>User ID</th>
-          <td mat-cell *matCellDef="let playlist">{{ playlist.userId }}</td>
-        </ng-container>
-
-        <!-- Created At Column -->
         <ng-container matColumnDef="createdAt">
           <th mat-header-cell *matHeaderCellDef>Created At</th>
           <td mat-cell *matCellDef="let playlist">{{ playlist.createdAt | date : 'short' }}</td>
@@ -81,4 +53,40 @@
       </table>
     </mat-card-content>
   </mat-card>
+</div>
+
+<!-- ===== Popup - Play Simulation ===== -->
+<div class="popup-overlay" *ngIf="showPlayPopup">
+  <div class="popup">
+    <h3>Now Playing 🎵</h3>
+    <p><strong>{{ selectedSong?.title }}</strong> — {{ selectedSong?.artist }}</p>
+    <p><em>Simulated playback...</em></p>
+    <button mat-stroked-button color="warn" (click)="closePlayPopup()">Close</button>
+  </div>
+</div>
+
+<!-- ===== Popup - Add to Playlist ===== -->
+<div class="popup-overlay" *ngIf="showPlaylistPopup">
+  <div class="popup">
+    <h3>Add "{{ selectedSong?.title }}" to Playlist</h3>
+
+    <div *ngIf="playlists.length > 0; else noPlaylists">
+      <p>Select an existing playlist:</p>
+      <ul class="playlist-list">
+        <li *ngFor="let p of playlists" (click)="selectPlaylist(p)" class="playlist-item">
+          🎧 {{ p.name }}
+        </li>
+      </ul>
+    </div>
+
+    <ng-template #noPlaylists>
+      <p>No playlists yet.</p>
+    </ng-template>
+
+    <button mat-raised-button color="accent" (click)="createNewPlaylist()">
+      ➕ Create New Playlist
+    </button>
+
+    <button mat-stroked-button color="warn" (click)="closePlaylistPopup()">Cancel</button>
+  </div>
 </div>
